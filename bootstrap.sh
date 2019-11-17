@@ -7,10 +7,13 @@ cd ../.dotfiles
 # Make desired folders
 mkdir "$HOME/bin"
 mkdir "$HOME/Projects"
+chown $USER:$USER "$HOME/bin"
+chown $USER:$USER "$HOME/Projects"
 
 # Symlink all files in current directory to home directory
-for file in $( ls -A | grep -vE '*\.sh|\.git$|\.gitignore|*\.md' ) ; do
+for file in $( ls -A | grep -vE '*\.sh|\.git$|\.gitignore|*\.md|LICENSE' ) ; do
 	ln -sv "$PWD/$file" "$HOME"
+    chown -h $USER:$USER "$HOME/$file"
 done
 
 apt update && apt upgrade
