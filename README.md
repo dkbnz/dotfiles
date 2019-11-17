@@ -7,5 +7,5 @@ A few dotfiles. Current OS of choice is Linux Mint.
 cd $HOME
 git clone https://github.com/dkbarrett/dotfiles
 cd dotfiles
-bash bootstrap.sh
+sudo bash bootstrap.sh
 ```
