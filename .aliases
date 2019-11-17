@@ -1,0 +1,8 @@
+# Fetch external ip address
+alias ipe='curl ipinfo.io/ip'
+
+# Ensure wget is always started with the continue flag
+alias wget='wget -c '
+
+# Human readable file listing sorted by size
+alias lt='ls --human-readable --color --size -1 -S --classify '
