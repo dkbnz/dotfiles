@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Rename current directory to make it hidden, cd into said directory
+mv ../dotfiles ../.dotfiles
+cd ../.dotfiles
+
+# Add custom scripts to path
+export PATH=~/.dotfiles/bin:${PATH}
+
+# Symlink all files in ./files to home directory
+for file in $( ls -A files ) ; do
+    ln -sv "$PWD/files/$file" "$HOME"
+    chown -h $USER:$USER "$HOME/$file"
+done
+
+# Import spotify repository
+curl -sSL https://download.spotify.com/debian/pubkey.gpg | sudo apt-key add - 
+echo "deb http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list
+
+# Import atom repository
+curl -sSL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list
+
+apt-get update -y && apt-get upgrade -y
+
+# Install all packages listed in pkglist
+xargs apt-get install -y < ./packages/system
+apt-get autoremove -y
+
+xargs apm install -y < ./packages/atom
+
