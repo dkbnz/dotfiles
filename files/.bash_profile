@@ -1,5 +1,2 @@
-export PATH="$HOME/bin:$PATH"
+[[ -s ~/.bashrc ]] && . ~/.bashrc
 
-source .exports
-source .functions
-source .aliases
