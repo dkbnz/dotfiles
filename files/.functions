@@ -45,16 +45,12 @@ fi
 endot()
 {
   cd ~/.dotfiles
-  tar czf encrypted.tar.gz sensitive
-  gpg -er "Doug Barrett" encrypted.tar.gz
-  rm encrypted.tar.gz
+  tar -cz sensitive | gpg -er 8E15A7165B24ED72 -o encrypted.tar.gz.gpg
 }
 
 # Decrypt sensitive dotfiles
 dedot()
 {
   cd ~/.dotfiles
-  gpg -do encrypted.tar.gz encrypted.tar.gz.gpg
-  tar xvf encrypted.tar.gz
-  rm encrypted.tar.gz
+  gpg -d encrypted.tar.gz.gpg | tar xz
 }
