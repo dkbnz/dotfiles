@@ -23,3 +23,5 @@ alias ipe='curl ipinfo.io/ip'
 # Ensure wget is always started with the continue flag
 alias wget='wget -c '
 
+# Other git aliases found in .gitconfig
+alias g='git '

@@ -1,16 +1,43 @@
 #!/bin/bash
 
+REAL_USER=${SUDO_USER:-$USER}
+USER_HOME=$(eval echo "~${REAL_USER}")
+
+function backup_existing {
+	fullname=${1}
+	name=$(basename ${fullname})
+	
+	if [ -f "${fullname}" ]; then
+		[ -f "${USER_HOME}/${name}" ] && mv "${USER_HOME}/${name}" "${USER_HOME}/~${name}"
+	elif [ -d "${fullname}" ]; then
+		[ -d "${USER_HOME}/${name}" ] && mv "${USER_HOME}/${name}" "${USER_HOME}/~${name}"
+	fi
+}
+
+
 # Rename current directory to make it hidden, cd into said directory
 mv ../dotfiles ../.dotfiles
 cd ../.dotfiles
 
 # Add custom scripts to path
-export PATH=~/.dotfiles/bin:${PATH}
+export PATH=${USER_HOME}/.dotfiles/bin:${PATH}
 
 # Symlink all files in ./files to home directory
 for file in $( ls -A files ) ; do
-    ln -sv "$PWD/files/$file" "$HOME"
-    chown -h $USER:$USER "$HOME/$file"
+	backup_existing "${PWD}/files/${file}" 
+    ln -sv "${PWD}/files/${file}" "${USER_HOME}"
+    chown -h "${REAL_USER}:${REAL_USER}" "${USER_HOME}/${file}"
+done
+
+# Decrypt all of the sensitive files
+sudo -H -u ${REAL_USER} bash -c "gpg -d encrypted.tar.gz.gpg | tar xz"
+
+# Symlink all files in ./sensitive to home directory
+for file in $( ls -A sensitive ) ; do
+	backup_existing "${PWD}/sensitive/${file}" 
+    ln -sv "${PWD}/sensitive/${file}" "${USER_HOME}"
+    chown -h "${REAL_USER}:${REAL_USER}" "${USER_HOME}/${file}"
+	chmod -R 700 "${USER_HOME}/${file}"
 done
 
 # Import spotify repository
