@@ -41,7 +41,7 @@ for file in $( ls -A sensitive ) ; do
 done
 
 # Import spotify repository
-curl -sSL https://download.spotify.com/debian/pubkey_0D811D58.gpg | sudo apt-key add -
+wget -qO- https://download.spotify.com/debian/pubkey_0D811D58.gpg | sudo apt-key add -
 echo "deb http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list
 
 apt-get update -y && apt-get upgrade -y

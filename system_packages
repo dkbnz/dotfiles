@@ -1,6 +1,6 @@
 build-essential
 tree
-firefox
+firefox-esr
 tmux
 imagemagick
 ranger
@@ -9,7 +9,7 @@ wget
 spotify-client
 htop
 vlc
-rar
+unrar-free
 cabextract
 libreoffice-calc
 libreoffice-writer

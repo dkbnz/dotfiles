@@ -1,0 +1,24 @@
+[user]
+  name = dkbarrett
+  email = dk.barrett@hotmail.com
+
+[alias]
+  ci = commit
+  ca = !"git add -A && git commit -av"
+  co = checkout
+  df = diff -w
+  br = branch
+  st = status
+  last = log -1 HEAD
+  me = merge --no-ff
+  lg = log --decorate --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+  lol = log --graph --oneline --decorate
+  lop = log -p
+  put = push origin HEAD
+  sha = !"git rev-parse HEAD | tr -d \"\n\" | pbcopy"
+  bn = !"git name-rev HEAD --name-only | tr -d \"\n\" | pbcopy"
+  fml = !"git fetch && git reset --hard origin/master"
+  fe = fetch -p
+  fepull = !"git fetch -p && git pull"
+  cah = commit --amend -CHEAD
+
