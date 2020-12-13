@@ -17,15 +17,9 @@ done
 curl -sSL https://download.spotify.com/debian/pubkey_0D811D58.gpg | sudo apt-key add -
 echo "deb http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list
 
-# Import atom repository
-curl -sSL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
-echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list
-
 apt-get update -y && apt-get upgrade -y
 
 # Install all packages listed in pkglist
-xargs apt-get install -y < ./packages/system
+xargs apt-get install -y < ./system_packages
 apt-get autoremove -y
-
-xargs apm install -y < ./packages/atom
 
