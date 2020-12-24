@@ -3,50 +3,105 @@
 REAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo "~${REAL_USER}")
 
+
+function usage {
+cat << EOF
+usage: install [OPTIONS]
+-l | --link      Link dotfiles to home directory
+-s | --server    Install server packages  (Root required)
+-d | --desktop   Install desktop packages (Root required)
+EOF
+}
+
+
+function check_root {
+    if [ $(id -u) -ne 0 ]; then
+        echo "Option requires superuser privileges"
+        usage
+        exit 1
+    fi
+}
+
+
 function backup_existing {
-	fullname=${1}
-	name=$(basename ${fullname})
-	
-	if [ -f "${fullname}" ]; then
-		[ -f "${USER_HOME}/${name}" ] && mv "${USER_HOME}/${name}" "${USER_HOME}/~${name}"
-	elif [ -d "${fullname}" ]; then
-		[ -d "${USER_HOME}/${name}" ] && mv "${USER_HOME}/${name}" "${USER_HOME}/~${name}"
+	destination=${1}
+	if [[ -f "${destination}" || -d "${destination}" ]]; then
+		mv "${destination}" "$(dirname ${destination})/~$(basename ${destination})"
 	fi
 }
 
 
-# Rename current directory to make it hidden, cd into said directory
-mv ../dotfiles ../.dotfiles
-cd ../.dotfiles
+function link_files {
+    source_files=$1
+    output_dir=$2
+    for file in $( find ${source_files} -type f ); do
+        destination=${output_dir}${file#"${source_files}"}
+        backup_existing ${destination}
+        mkdir -p $( dirname ${destination} )
+        ln -sfv "${file}" "${destination}"
+        chown -h "${REAL_USER}:${REAL_USER}" "${destination}"
+    done
+}
 
-# Add custom scripts to path
-export PATH=${USER_HOME}/.dotfiles/bin:${PATH}
 
-# Symlink all files in ./files to home directory
-for file in $( ls -A files ) ; do
-	backup_existing "${PWD}/files/${file}" 
-    ln -sv "${PWD}/files/${file}" "${USER_HOME}"
-    chown -h "${REAL_USER}:${REAL_USER}" "${USER_HOME}/${file}"
+function install_packages {
+    apt-get update -y && apt-get upgrade -y
+    xargs apt-get install -y < $1 
+    apt-get autoremove -y
+}
+
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -l | --link )
+            link=$1
+            shift
+        ;;
+        -s | --server )
+            server=$1              
+            shift
+        ;;
+        -d | --desktop )
+            desktop=$1
+            shift
+        ;;
+        -h | --help )
+            usage
+            exit  
+        ;;
+        * ) 
+            usage
+            exit 1
+    esac
+    shift
 done
 
-# Decrypt all of the sensitive files
-sudo -H -u ${REAL_USER} bash -c "gpg -d encrypted.tar.gz.gpg | tar xz"
+if [[ -z ${link} && -z ${server} && -z ${desktop} ]]; then
+    echo "Please specify at least one option." 
+    usage
+    exit 1
+fi
 
-# Symlink all files in ./sensitive to home directory
-for file in $( ls -A sensitive ) ; do
-	backup_existing "${PWD}/sensitive/${file}" 
-    ln -sv "${PWD}/sensitive/${file}" "${USER_HOME}"
-    chown -h "${REAL_USER}:${REAL_USER}" "${USER_HOME}/${file}"
-	chmod -R 700 "${USER_HOME}/${file}"
-done
+if [ $(basename ${PWD}) == "dotfiles" ]; then
+    mv ../dotfiles ../.dotfiles
+    cd ../.dotfiles
+fi
 
-# Import spotify repository
-wget -qO- https://download.spotify.com/debian/pubkey_0D811D58.gpg | sudo apt-key add -
-echo "deb http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list
+if [ -n "${link}" ]; then
+    cd ~/.dotfiles 
+    link_files ${PWD}/src ${USER_HOME}
+fi
 
-apt-get update -y && apt-get upgrade -y
+if [ -n "${server}" ]; then
+    check_root
+    cd ~/.dotfiles 
+    install_packages ${PWD}/server_packages
+fi
 
-# Install all packages listed in pkglist
-xargs apt-get install -y < ./system_packages
-apt-get autoremove -y
-
+if [ -n "${desktop}" ]; then
+    check_root
+    cd ~/.dotfiles 
+    wget -qO- https://download.spotify.com/debian/pubkey_0D811D58.gpg | apt-key add -
+    echo "deb http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list
+    install_packages ${PWD}/desktop_packages
+fi

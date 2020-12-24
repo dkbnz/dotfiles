@@ -7,6 +7,5 @@ A few dotfiles. Used on debian based operating systems.
 cd $HOME
 git clone https://github.com/dkbarrett/dotfiles
 cd dotfiles
-sudo ./install
+./install --help
 ```
-

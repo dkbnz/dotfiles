@@ -1,11 +1,11 @@
 
 # Make and cd into a directory
-function mk() {
+mk() {
   mkdir -p "$@" && cd "$@"
 }
 
 # Generic extract function for majority of archives
-function extract {
+extract() {
   if [ -z "$1" ]; then
     # display usage if no parameters given
     echo "Usage: extract <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz>"
@@ -42,15 +42,31 @@ fi
 }
 
 # Encrypt sensitive dotfiles
-endot()
-{
+endot() {
   cd ~/.dotfiles
   tar -cz sensitive | gpg -er 8E15A7165B24ED72 -o encrypted.tar.gz.gpg
 }
 
 # Decrypt sensitive dotfiles
-dedot()
-{
+dedot() {
   cd ~/.dotfiles
   gpg -d encrypted.tar.gz.gpg | tar xz
+}
+
+# Version control specified dotfile
+dot() {
+  if [ -z "$1" ]; then
+    echo "Usage: dot DOTFILES..."
+    echo "Version control specified DOTFILE(S), preserving directory structure."
+    return 1
+  fi
+  for file in $@; do
+    filename=$(readlink -f ${file}) 
+    destination=${HOME}/.dotfiles/src${filename#"${HOME}"}
+    mkdir -p $(dirname ${destination}) > /dev/null
+    echo "Moving ${filename} to ${destination}"
+    mv "${filename}" "${destination}"
+    echo "Creating symbolic link to new location."
+    ln -sfv "${destination}" "${filename}"
+  done
 }
