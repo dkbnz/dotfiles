@@ -15,13 +15,23 @@ alias ll='ls -alF'
 alias la='ls -A'
 
 # Human readable file listing sorted by size
-alias lt='ls --human-readable --color --size -1 -S --classify '
+alias lt='ls --human-readable --color --size -1 -S --classify'
+
+# Move up a directory and list contents 'cl' defined in functions
+alias ..='cl ..'
 
 # Fetch external ip address
 alias ipe='curl ipinfo.io/ip'
 
 # Ensure wget is always started with the continue flag
-alias wget='wget -c '
+alias wget='wget -c'
 
 # Other git aliases found in .gitconfig
-alias g='git '
+alias g='git'
+
+# Grep bash history to find old command
+alias gh='history | grep'
+
+# Change to latest modified directory in working directory
+alias cld='cl "$(\ls -1dt ./*/ | head -n 1)"'
+

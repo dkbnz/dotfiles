@@ -4,6 +4,12 @@ mk() {
   mkdir -p "$@" && cd "$@"
 }
 
+# Change into directory and list contents
+cl() {
+  cd "$@" && \
+    ls --human-readable --color --size -1 -S --classify
+}
+
 # Generic extract function for majority of archives
 extract() {
   if [ -z "$1" ]; then
