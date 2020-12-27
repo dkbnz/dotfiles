@@ -21,4 +21,3 @@
   fe = fetch -p
   fepull = !"git fetch -p && git pull"
   cah = commit --amend -CHEAD
-

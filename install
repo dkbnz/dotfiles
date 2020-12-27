@@ -7,6 +7,7 @@ usage: install [OPTIONS]
 -l | --link      Link dotfiles to home directory
 -s | --server    Install server packages  (Root required)
 -d | --desktop   Install desktop packages (Root required)
+-h | --help      Show this help message
 EOF
 }
 
@@ -37,6 +38,7 @@ link_files() {
         mkdir -p $( dirname ${destination} )
         echo -e "$(ln -sfv "${file}" "${destination}") \033[0;32mlinked\033[0m"
     done
+    source ~/.bash_profile
 }
 
 

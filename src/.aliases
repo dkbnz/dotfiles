@@ -17,8 +17,11 @@ alias la='ls -A'
 # Human readable file listing sorted by size
 alias lt='ls --human-readable --color --size -1 -S --classify'
 
-# Move up a directory and list contents 'cl' defined in functions
+# Move up a directory and list contents. 'cl' defined in functions
 alias ..='cl ..'
+alias ...='cl ../..'
+alias ....='cl ../../..'
+alias .....='cl ../../../..'
 
 # Fetch external ip address
 alias ipe='curl ipinfo.io/ip'
@@ -35,3 +38,5 @@ alias gh='history | grep'
 # Change to latest modified directory in working directory
 alias cld='cl "$(\ls -1dt ./*/ | head -n 1)"'
 
+# Repeat last command
+alias rc='fc -s'

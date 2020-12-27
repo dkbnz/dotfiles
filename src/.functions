@@ -67,7 +67,7 @@ dot() {
     return 1
   fi
   for file in $@; do
-    filename=$(readlink -f ${file}) 
+    filename=$(readlink -f ${file})
     destination=${HOME}/.dotfiles/src${filename#"${HOME}"}
     mkdir -p $(dirname ${destination}) > /dev/null
     echo "Moving ${filename} to ${destination}"
@@ -75,4 +75,12 @@ dot() {
     echo "Creating symbolic link to new location."
     ln -sfv "${destination}" "${filename}"
   done
+}
+
+# Update dotfiles. Pull the latest dotfiles from git, update links, source .bashrc.
+updot() {
+  cd ~/.dotfiles
+  git pull
+  ./install -l
+  source ~/.bashrc
 }
