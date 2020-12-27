@@ -24,18 +24,25 @@ link_files() {
     source_files=$1
     for file in $( find ${source_files} -type f ); do
         destination=${HOME}${file#"${source_files}"}
-        if [[ -f "${destination}" || -d "${destination}" ]]; then
+
+        # If link exists, skip. If file exists, move to ~filename.ext
+        if [ -L ${destination} ] && [ $(readlink -f ${destination}) == "${file}" ]; then
+            echo -e "'${destination}' -> '${file}' \033[1;33mexists\033[0m"
+            continue
+        elif [ -e ${destination} ] ; then
+            echo "'${destination}' exists as a file, moving it to ~$(basename ${destination})"
             mv "${destination}" "$(dirname ${destination})/~$(basename ${destination})"
         fi
+
         mkdir -p $( dirname ${destination} )
-        ln -sfv "${file}" "${destination}"
+        echo -e "$(ln -sfv "${file}" "${destination}") \033[0;32mlinked\033[0m"
     done
 }
 
 
 install_packages() {
     apt-get update -y && apt-get upgrade -y
-    xargs apt-get install -y < $1 
+    xargs apt-get install -y < $1
     apt-get autoremove -y
 }
 
@@ -46,16 +53,16 @@ while [[ $# -gt 0 ]]; do
             link=$1
         ;;
         -s | --server )
-            server=$1              
+            server=$1
         ;;
         -d | --desktop )
             desktop=$1
         ;;
         -h | --help )
             usage
-            exit  
+            exit
         ;;
-        * ) 
+        * )
             usage
             exit 1
     esac
@@ -63,7 +70,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z ${link} && -z ${server} && -z ${desktop} ]]; then
-    echo "Please specify at least one option." 
+    echo "Please specify at least one option."
     usage
     exit 1
 fi
