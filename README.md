@@ -17,15 +17,15 @@ usage: install [OPTIONS]
 -h | --help      Show this help message
 ```
 
-### `-l | --link`
+#### `-l | --link`
 
 All files in the `src/` directory will be symlinked to their corresponding location in the user's `$HOME` directory. Existing files will have a `~` prepended to their filename as a means of backup. If a target file in the `$HOME` directory is a link, it will be overwritten by the new link.
 
-### `-s | --server`
+#### `-s | --server`
 
  Install packages in `server_packages` using apt. These are mainly tools needed for basic server administration and support some of the user defined bash functions in `src/.functions`
 
-### `-d | --desktop`
+#### `-d | --desktop`
 
  Install packages in `desktop_packages` using apt. Used with a fresh install.
 
