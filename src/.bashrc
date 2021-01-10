@@ -95,8 +95,8 @@ if [ -n "${PS1}" ]; then (
     read one five fifteen _ < /proc/loadavg
     echo "$(tput setaf 5)$(tput bold)"
     echo "Uptime.........: $(motd_time)"
-    echo "Memory.........: $(free -m | grep Mem: | awk {'print $4'})MB (Free) / $(free -m | grep Mem: | awk {'print $2'})MB (Total)"
-    echo "Load Averages..: ${one}, ${five}, ${fifteen} (1, 5, 15 min)")
-    echo "$(tput sgr0)"
+    echo "Memory.........: $(free -m | grep Mem: | awk {'print $7'})MB (Available) / $(free -m | grep Mem: | awk {'print $2'})MB (Total)"
+    echo "Load Averages..: ${one}, ${five}, ${fifteen} (1, 5, 15 min)"
+    echo "$(tput sgr0)")
 fi
 
