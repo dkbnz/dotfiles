@@ -34,7 +34,7 @@ All files in the `src/` directory will be symlinked to their corresponding locat
 Some functions defined in `src/.functions` are for the management of these dotfiles.
 - `dot DOTFILES...`: Add specified file(s) to version control. This will move the file(s) to the `src/` directory, preserving the directory structure from the user's `$HOME` directory. File(s) will then be symlinked back to maintain functionality.
 - `updot`: Pull the latest dotfiles, update links and source `~/.bashrc` to use the latest changes.
-- `endot`: Create a tar of all files in `src_sensitive` and encrypt them using gpg. Resulting file is `encrypted.tar.gz.gpg`
+- `endot`: Create a tar of all files in `sensitive` and encrypt them using gpg. Resulting file is `encrypted.tar.gz.gpg`
 - `dedot`: Perform the inverse of `endot`, provided the user has the required private key.
 
 ## Notes

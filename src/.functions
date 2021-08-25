@@ -50,7 +50,7 @@ fi
 # Encrypt sensitive dotfiles
 endot() {
   cd ~/.dotfiles
-  tar -cz sensitive | gpg -er 8E15A7165B24ED72 -o encrypted.tar.gz.gpg
+  tar -cz sensitive | gpg -er 22233D8D -o encrypted.tar.gz.gpg
 }
 
 # Decrypt sensitive dotfiles
