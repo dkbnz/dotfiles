@@ -71,8 +71,8 @@ if [ -f ~/.exports ]; then
     . ~/.exports
 fi
 
-if [ -f ~/.themes ]; then
-    . ~/.themes
+if [ -f ~/.theme ]; then
+    . ~/.theme
 fi
 
 export NVM_DIR="$HOME/.nvm"

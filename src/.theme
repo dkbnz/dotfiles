@@ -1,4 +1,4 @@
-#!/bin/bash
+# Set terminal colours
 
 color00="18/18/18" # Base 00 - Black
 color01="ab/46/42" # Base 08 - Red

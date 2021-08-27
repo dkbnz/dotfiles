@@ -2,6 +2,7 @@ build-essential
 cabextract
 curl
 htop
+nmap
 ranger
 rsync
 tree
