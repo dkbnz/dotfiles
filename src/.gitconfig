@@ -1,6 +1,6 @@
 [user]
-  name = dkbarrett
-  email = dk.barrett+gh@hotmail.com
+  name = Doug Barrett
+  email = mail+git@dkb.nz
 
 [alias]
   ci = commit
@@ -25,3 +25,5 @@
 
 [init]
 	defaultBranch = trunk
+[pull]
+	rebase = false

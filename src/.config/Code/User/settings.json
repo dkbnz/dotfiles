@@ -1,25 +1,30 @@
 {
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true,
-    "files.eol": "\n",
-    "files.trimTrailingWhitespace": true,
-    "files.watcherExclude": {
-        "**/.git/objects/**": true,
-        "**/.git/subtree-cache/**": true,
-        "**/node_modules/*/**": true
-    },
-    "keyboard.dispatch": "keyCode",
-    "search.exclude": {
-        "**/node_modules": true,
-        "**/bower_components": true,
-        ".build/**": true,
-        "out*/**": true,
-        "i18n/**": true,
-        "extensions/**/out/**": true,
-        "*.min.js": true
-    },
-    "telemetry.enableTelemetry": false,
-    "telemetry.enableCrashReporter": false,
-    "workbench.colorTheme": "Default Dark+"
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true
+  },
+  "keyboard.dispatch": "keyCode",
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    ".build/**": true,
+    "out*/**": true,
+    "i18n/**": true,
+    "extensions/**/out/**": true,
+    "*.min.js": true
+  },
+  "telemetry.enableTelemetry": false,
+  "telemetry.enableCrashReporter": false,
+  "workbench.colorTheme": "Default Dark+",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
