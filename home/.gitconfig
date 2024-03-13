@@ -27,3 +27,5 @@
 	defaultBranch = trunk
 [pull]
 	rebase = false
+[push]
+	autoSetupRemote = true
