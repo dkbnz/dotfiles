@@ -59,21 +59,9 @@ if ! shopt -oq posix; then
     fi
 fi
 
-if [ -f ~/.aliases ]; then
-    . ~/.aliases
-fi
-
-if [ -f ~/.functions ]; then
-    . ~/.functions
-fi
-
-if [ -f ~/.exports ]; then
-    . ~/.exports
-fi
-
-if [ -f ~/.theme ]; then
-    . ~/.theme
-fi
+for file in $( find $HOME/.config/bash_profile -type l ); do
+    . $file
+done
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

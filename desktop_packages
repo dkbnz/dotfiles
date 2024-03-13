@@ -1,8 +1,11 @@
 firefox-esr
+i3-wm
 imagemagick
 libreoffice-calc
 libreoffice-writer
-spotify-client
+suckless-tools
 tlp
 vlc
+xinit
+xorg
 xournal

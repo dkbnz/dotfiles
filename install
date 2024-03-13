@@ -85,9 +85,9 @@ fi
 if [ -n "${link}" ]; then
     if [ $(id -u) -eq 0 ]; then
         export -f link_files
-        su ${SUDO_USER:-$USER} -c "link_files ${PWD}/src"
+        su ${SUDO_USER:-$USER} -c "link_files ${PWD}/home"
     else
-        link_files ${PWD}/src
+        link_files ${PWD}/home
     fi
 fi
 
@@ -98,7 +98,5 @@ fi
 
 if [ -n "${desktop}" ]; then
     check_root
-    wget -qO- https://download.spotify.com/debian/pubkey_0D811D58.gpg | apt-key add -
-    echo "deb http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list
     install_packages ./desktop_packages
 fi

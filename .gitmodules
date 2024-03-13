@@ -1,0 +1,3 @@
+[submodule "neovim"]
+	path = pkg_src/neovim
+	url = https://github.com/neovim/neovim
