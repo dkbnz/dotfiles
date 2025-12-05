@@ -1,0 +1,6 @@
+# Load common configuration (version controlled)
+if [ -f "$HOME/dotfiles/zsh/.zshrc.common" ]; then
+    source "$HOME/dotfiles/zsh/.zshrc.common"
+fi
+
+# Machine specific configuration below (not version controlled)

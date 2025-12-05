@@ -1,0 +1,179 @@
+# --- 1. ENVIRONMENT & PATH ----------------------------------------------------
+
+# Ensure core system binaries are prioritized
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Editor settings
+export EDITOR='vim'
+export VISUAL='vim'
+export GPG_TTY=$(tty)
+
+# Colored GCC warnings
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# --- 2. OH-MY-ZSH SETUP -------------------------------------------------------
+
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+plugins=(git)
+
+# Source Oh-My-Zsh if it exists
+if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
+    source "$ZSH/oh-my-zsh.sh"
+fi
+
+# --- 3. TOOL CONFIGURATION ----------------------------------------------------
+
+# NVM (Node Version Manager)
+export NVM_DIR="$HOME/.nvm"
+[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+[[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+
+# --- 4. ALIASES ---------------------------------------------------------------
+
+# System & Navigation
+alias reload='source ~/.zshrc && echo "Config reloaded."'
+alias ll='ls -alF'
+alias la='ls -A'
+alias lt='ls --human-readable --color --size -1 -S --classify' # Sort by size
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Dotfiles Management (Navigates to repo and shows status)
+alias dotfiles='cd ~/dotfiles && git status'
+
+# Git Shortcuts
+alias g='git'
+alias gs='git status'
+alias gp='git push'
+alias gl='git pull'
+
+# Utilities
+alias at="cat ~/.at | gpg --decrypt | bash"  # Run encrypted script
+alias rc='fc -s'                             # Repeat last command
+
+# --- 5. FUNCTIONS -------------------------------------------------------------
+
+# Create directory and enter it
+mk() {
+    mkdir -p "$@" && cd "$@"
+}
+
+# Recursive cat for LLMs (Prints file structure and content)
+rcat() {
+    local pattern="$1"
+    [[ -z "$pattern" ]] && pattern="."
+    
+    find . -type f -name "$pattern" | sort | while IFS= read -r file; do
+        if file --mime-type "$file" | grep -q '^.*: text/'; then
+            echo "===== ${file#./} ====="
+            cat "$file"
+            echo; echo
+        fi
+    done
+}
+
+# Encrypt file/directory to .tar.gz.enc
+encrypt() {
+    local target="$1"
+    if [[ ! -e "$target" ]]; then echo "Error: '$target' not found."; return 1; fi
+    
+    echo "Encrypting '$target'..."
+    tar -czf - "$target" | openssl enc -aes-256-cbc -e -out "$target.tar.gz.enc"
+}
+
+# Decrypt .tar.gz.enc file
+decrypt() {
+    local target="$1"
+    if [[ "$target" != *.tar.gz.enc ]]; then echo "Error: Input must be .tar.gz.enc"; return 1; fi
+    
+    echo "Decrypting '$target'..."
+    openssl enc -aes-256-cbc -d -in "$target" | tar -xzf -
+}
+
+# Universal Extract (Handles most archive types)
+extract() {
+    if [[ -z "$1" ]]; then echo "Usage: extract <archive>"; return 1; fi
+    if [[ ! -f "$1" ]]; then echo "Error: '$1' is not a file"; return 1; fi
+
+    case "$1" in
+        *.tar.bz2)   tar xjf "$1"     ;;
+        *.tar.gz)    tar xzf "$1"     ;;
+        *.bz2)       bunzip2 "$1"     ;;
+        *.rar)       unrar x "$1"     ;;
+        *.gz)        gunzip "$1"      ;;
+        *.tar)       tar xf "$1"      ;;
+        *.tbz2)      tar xjf "$1"     ;;
+        *.tgz)       tar xzf "$1"     ;;
+        *.zip)       unzip "$1"       ;;
+        *.Z)         uncompress "$1"  ;;
+        *.7z)        7z x "$1"        ;;
+        *)           echo "'$1' cannot be extracted via extract()" ;;
+    esac
+}
+
+# Smart Clone (Clones to ~/git/host/user/repo)
+gclone() {
+    local url="$1"
+    [[ -z "$url" ]] && { echo "Usage: gclone <url>"; return 1; }
+
+    # Normalize URL to path structure
+    local repo_path=$(echo "$url" | sed -E 's#^[a-z]+://##; s#^git@##' | tr ':' '/' | sed 's/\.git$//')
+    local target_dir="$HOME/git/$repo_path"
+
+    git clone --filter=blob:none "$@" "$target_dir"
+    
+    if command -v code &> /dev/null; then
+        code "$target_dir"
+    else
+        echo "Cloned to $target_dir"
+    fi
+}
+
+# Git Tidy (Organizes loose git repos into ~/git/host/user/repo structure)
+gtidy() {
+    local dest_dir="$HOME/git"
+    local source_dir="$dest_dir"
+    local dry_run=true
+    local -a move_cmd=(echo "Would move")
+
+    for arg in "$@"; do
+        if [[ "$arg" == "run" ]]; then dry_run=false; move_cmd=(mv);
+        elif [[ -d "$arg" ]]; then source_dir=$(cd "$arg" && pwd); fi
+    done
+
+    [[ $dry_run == true ]] && echo "⚠️  DRY RUN (Use 'run' to execute)"
+
+    find "$source_dir" -name ".git" -type d -prune | while read -r gitdir; do
+        local repo_root=$(dirname "$gitdir")
+        local parent_dir=$(dirname "$repo_root")
+        
+        # Skip if inside another repo (submodule check)
+        git -C "$parent_dir" rev-parse --is-inside-work-tree &>/dev/null && continue
+
+        # Determine Origin URL
+        local url=$(git -C "$repo_root" remote get-url origin 2>/dev/null)
+        local repo_path=""
+        
+        if [[ -z "$url" ]]; then
+            repo_path="local/$(basename "$repo_root")"
+        else
+            repo_path=$(echo "$url" | sed -E 's#^[a-z]+://##; s#^git@##' | tr ':' '/' | sed 's/\.git$//')
+        fi
+        
+        local target_path="$dest_dir/$repo_path"
+        
+        if [[ "$repo_root" != "$target_path" ]]; then
+            if [[ -d "$target_path" ]]; then
+                echo "❌ Conflict: $target_path exists"
+            else
+                echo "🔄 Moving: $repo_root -> $target_path"
+                if ! $dry_run; then
+                    mkdir -p "$(dirname "$target_path")"
+                    "${move_cmd[@]}" "$repo_root" "$target_path"
+                    rmdir -p "$(dirname "$repo_root")" 2>/dev/null
+                fi
+            fi
+        fi
+    done
+}
