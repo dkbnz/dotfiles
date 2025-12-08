@@ -2,7 +2,7 @@
 
 ```
 cd $HOME
-git clone <this_repo>
+git clone https://github.com/dkbnz/dotfiles.git
 mv $HOME/.zshrc $HOME/.zshrc.bak
 cp $HOME/dotfiles/.zshrc.example $HOME
 source $HOME/.zshrc

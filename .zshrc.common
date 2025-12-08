@@ -14,7 +14,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 # --- 2. OH-MY-ZSH SETUP -------------------------------------------------------
 
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="robbyrussell"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git)
 
 # Source Oh-My-Zsh if it exists
