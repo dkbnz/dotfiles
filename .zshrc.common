@@ -15,7 +15,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
-plugins=(git)
+plugins=(git zsh-autosuggestions)
 
 # Source Oh-My-Zsh if it exists
 if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
@@ -112,6 +112,21 @@ extract() {
     esac
 }
 
+# Build cd<slug> aliases for every git repo under ~/git at shell startup.
+# Slug is the repo directory name, lowercased with hyphens/underscores/dots removed.
+# Completion: zsh resolves alias names natively, so typing cdmy<TAB> shows all
+# matching aliases. No extra compdef wiring is needed.
+_build_git_aliases() {
+    local git_root="$HOME/git"
+    [[ -d "$git_root" ]] || return
+    while IFS= read -r git_dir; do
+        local repo_dir="${git_dir%/.git}"
+        local slug=$(basename "$repo_dir" | tr '[:upper:]' '[:lower:]' | tr -d '_.-')
+        alias "cd${slug}"="cd \"$repo_dir\""
+    done < <(find "$git_root" -name ".git" -type d -prune 2>/dev/null)
+}
+_build_git_aliases
+
 # Smart Clone (Clones to ~/git/host/user/repo)
 gclone() {
     local url="$1"
@@ -121,13 +136,9 @@ gclone() {
     local repo_path=$(echo "$url" | sed -E 's#^[a-z]+://##; s#^git@##' | tr ':' '/' | sed 's/\.git$//')
     local target_dir="$HOME/git/$repo_path"
 
-    git clone --filter=blob:none "$@" "$target_dir"
-    
-    if command -v code &> /dev/null; then
-        code "$target_dir"
-    else
-        echo "Cloned to $target_dir"
-    fi
+    git clone "$@" "$target_dir" || return 1
+    _build_git_aliases
+    cd "$target_dir"
 }
 
 # Git Tidy (Organizes loose git repos into ~/git/host/user/repo structure)
@@ -1897,3 +1908,32 @@ typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
 
 (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
 'builtin' 'unset' 'p10k_config_opts'
+
+# Port manager: find or kill processes on a specific port
+# Usage: port 8080 (to list) or port 8080 -k (to kill)
+port() {
+  local port=$1
+  local flag=$2
+
+  if [ -z "$port" ]; then
+    echo "Usage: port <number> [-k]"
+    return 1
+  fi
+
+  # Find the PID
+  local pid=$(lsof -t -i :$port)
+
+  if [ -z "$pid" ]; then
+    echo "No process found on port $port"
+    return 0
+  fi
+
+  if [ "$flag" = "-k" ]; then
+    echo "Killing process $pid on port $port..."
+    kill -9 $pid
+  else
+    echo "Listing process on port $port:"
+    lsof -i :$port
+    echo "\nRun 'port $port -k' to kill this process."
+  fi
+}
