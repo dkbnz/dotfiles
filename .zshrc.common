@@ -112,33 +112,61 @@ extract() {
     esac
 }
 
-# Build cd<slug> aliases for every git repo under ~/git at shell startup.
-# Slug is the repo directory name, lowercased with hyphens/underscores/dots removed.
-# Completion: zsh resolves alias names natively, so typing cdmy<TAB> shows all
-# matching aliases. No extra compdef wiring is needed.
+# Git directory aliases stored in ~/git/.cdaliases
+# Format: alias_name=path (one per line)
+_CDALIASES_FILE="$HOME/git/.cdaliases"
+
 _build_git_aliases() {
     local git_root="$HOME/git"
     [[ -d "$git_root" ]] || return
+    : > "$_CDALIASES_FILE"
     while IFS= read -r git_dir; do
         local repo_dir="${git_dir%/.git}"
         local slug=$(basename "$repo_dir" | tr '[:upper:]' '[:lower:]' | tr -d '_.-')
-        alias "cd${slug}"="cd \"$repo_dir\""
+        echo "cd${slug}=${repo_dir}" >> "$_CDALIASES_FILE"
     done < <(find "$git_root" -name ".git" -type d -prune 2>/dev/null)
+    _load_git_aliases
 }
-_build_git_aliases
 
-# Smart Clone (Clones to ~/git/host/user/repo)
+_load_git_aliases() {
+    [[ -f "$_CDALIASES_FILE" ]] || return
+    while IFS= read -r line; do
+        local name="${line%%=*}"
+        local dir="${line#*=}"
+        [[ -n "$name" && -n "$dir" ]] && alias "$name"="cd \"$dir\""
+    done < "$_CDALIASES_FILE"
+}
+
+if [[ -f "$_CDALIASES_FILE" ]]; then
+    _load_git_aliases
+else
+    _build_git_aliases
+fi
+
 gclone() {
     local url="$1"
     [[ -z "$url" ]] && { echo "Usage: gclone <url>"; return 1; }
 
-    # Normalize URL to path structure
     local repo_path=$(echo "$url" | sed -E 's#^[a-z]+://##; s#^git@##' | tr ':' '/' | sed 's/\.git$//')
     local target_dir="$HOME/git/$repo_path"
 
-    git clone "$@" "$target_dir" || return 1
+    if [[ -d "$target_dir/.git" ]]; then
+        echo "Repository exists at $target_dir"
+        cd "$target_dir" || return 1
+        if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
+            echo "Stashing local changes..."
+            git stash
+        fi
+        local default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+        [[ -z "$default_branch" ]] && default_branch=$(git remote show origin 2>/dev/null | awk '/HEAD branch/ {print $NF}')
+        [[ -z "$default_branch" ]] && default_branch="main"
+        echo "Checking out $default_branch and pulling..."
+        git checkout "$default_branch" && git pull
+    else
+        git clone "$@" "$target_dir" || return 1
+        cd "$target_dir"
+    fi
     _build_git_aliases
-    cd "$target_dir"
 }
 
 # Git Tidy (Organizes loose git repos into ~/git/host/user/repo structure)
